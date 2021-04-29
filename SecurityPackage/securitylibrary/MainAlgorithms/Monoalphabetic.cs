@@ -121,7 +121,52 @@ namespace SecurityLibrary
         /// <returns>Plain text</returns>
         public string AnalyseUsingCharFrequency(string cipher)
         {
-            throw new NotImplementedException();
+            cipher = cipher.ToLower();
+            string PlainText = "";
+            int[] alpha_freq = new int[26]; for (int i = 0; i < alpha_freq.Length; i++) alpha_freq[i] = 0;
+
+            char[] Frequency_Information = { 'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'h', 'l', 'd', 'c', 'u', 'm', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 'x', 'j', 'q', 'z' };
+
+            for (int c = 0; c < cipher.Length; c++)
+            {
+                alpha_freq[((int)cipher[c]) - shiffting_Amount_Alphabetic] += 1;  // count the repettion of each latter
+            }
+
+            Dictionary<char, char> Mapping = new Dictionary<char, char>(); // for mapping the predicted key with the freq_info
+            int max_freq = -1;
+            int index_max_freq_latter = -1;
+
+            for (int alpha = 0; alpha < Frequency_Information.Length; alpha++) // loop from the highest freq in the requency_Information
+            {
+                for (int f = 0; f < alpha_freq.Length; f++) // loop to get the coorespondeing latter match to generate the key
+                {
+                    if (alpha_freq[f] >= max_freq)
+                    {
+                        max_freq = alpha_freq[f];
+                        index_max_freq_latter = f;
+                    }
+                }
+
+                Mapping.Add(((char)(index_max_freq_latter + shiffting_Amount_Alphabetic)), Frequency_Information[alpha]); // key : Encrypted latter  , value : predicted latter based on freq-info- 
+
+                alpha_freq[index_max_freq_latter] = -2; // delete the freq of that letter index
+
+                max_freq = -1;
+                index_max_freq_latter = -1;
+            }
+
+            foreach (KeyValuePair<char,char> item in Mapping)
+            {
+                Console.WriteLine("K:  "+item.Key+"    V:   "+item.Value);
+            }
+
+            for (int c = 0; c < cipher.Length; c++)
+            {
+                PlainText += Mapping[cipher[c]];
+            }
+
+            return PlainText;
+            //throw new NotImplementedException();
         }
     }
 }
