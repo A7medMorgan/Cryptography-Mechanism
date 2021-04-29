@@ -26,7 +26,7 @@ namespace SecurityLibrary
                 arr_alpha[((int)cipherText[c]) - shiffting_Amount_Alphabetic] = 1; // mark the token char of the key
             }
 
-            for (int k = 0; k < arr_key.Length; k++)
+            for (int k = 0; k < arr_key.Length; k++) // re fill the empty places at the key
             {
                 if (arr_key[k] == '\0') // empty cell of the key
                 {
