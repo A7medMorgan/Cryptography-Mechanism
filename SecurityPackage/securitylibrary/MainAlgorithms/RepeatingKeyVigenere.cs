@@ -23,7 +23,7 @@ namespace SecurityLibrary
                 if(key.Length != 0) // avoid null index
                 if (keyword[i] == key[0])
                 {
-                    if (keyword.Length > key.Length)
+                    if (keyword.Length - i > key.Length) // if the rest of keyword stil biger than key take chunck from it
                     {
                         string sub_key = keyword.Substring(i, key.Length); // take sub string from the keyword 
                         if (key.Equals(sub_key)) // if the patter match key found
@@ -57,13 +57,13 @@ namespace SecurityLibrary
 
             string keyword = KeyWord(cipherText , key);
 
-            int[,] vigenere_tabluae = VigenereTableau(26);
+            int[,] vigenere_tableau = VigenereTableau(26);
 
             for (int _char = 0; _char < cipherText.Length; _char++)
             {
                 for (int col = 0; col < _base; col++)  // row  = key ,, col = text 
                 {
-                    if (((int)(cipherText[_char] - ascii)) == vigenere_tabluae[(int)(keyword[_char]-ascii) , col])
+                    if (((int)(cipherText[_char] - ascii)) == vigenere_tableau[(int)(keyword[_char]-ascii) , col])
                     {
                         PlainText += (char)(col + ascii);
                         break;
@@ -83,10 +83,10 @@ namespace SecurityLibrary
 
             string keyword = KeyWord(plainText, key);
 
-            int[,] vigenere_tabluae = VigenereTableau(_base);
+            int[,] vigenere_tableau = VigenereTableau(_base);
             for (int _char = 0; _char < plainText.Length; _char++)
             {
-                CipherText += (char)(vigenere_tabluae[(int)(plainText[_char] - ascii), (int)(keyword[_char] - ascii)] + ascii); // row  = text ,, col = key 
+                CipherText += (char)(vigenere_tableau[(int)(plainText[_char] - ascii), (int)(keyword[_char] - ascii)] + ascii); // row  = text ,, col = key 
             }
 
             return CipherText;
