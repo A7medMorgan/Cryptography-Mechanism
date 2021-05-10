@@ -18,24 +18,79 @@ namespace SecurityLibrary
             int m = 2;
             int _base = 26;
 
-            List<int> Key = new List<int>();
+            List<int> Key =null;
             List<int> sub_P_T = new List<int>();
             List<int> sub_C_T = new List<int>();
 
-            if (plainText.Count < m * 2 || cipherText.Count < m * 2) throw new TaskCanceledException();
+            //int[] P_T_arr = new int[m * m];
+            int[] C_T_arr = new int[m * m];
+            //if (plainText.Count < m * 2 || cipherText.Count < m * 2) throw new TaskCanceledException();
 
-            for (int i = 0; i < plainText.Count - 3; i++)
+
+            for (int i = 0; i < plainText.Count; i+=m) // get fisrt 2 letter
             {
-                for (int j = 0; j < 4; j++)
+                sub_P_T.Add(plainText[i]);
+                sub_P_T.Add(plainText[i + 1]);
+
+                //sub_C_T.Add(cipherText[i]);
+                //sub_C_T.Add(cipherText[i + 1]);
+
+                //P_T_arr[0] = plainText[i];
+                //P_T_arr[2] = plainText[i + 1];
+
+                C_T_arr[0] = cipherText[i];
+                C_T_arr[2] = cipherText[i + 1];
+
+
+                for (int j = i+m; j < plainText.Count; j+=m) // loop on every posible compinetion bettwen the first 2 letter and the rest of the plain text
                 {
-                    sub_P_T.Add(plainText[i + j]);
-                    sub_C_T.Add(cipherText[i + j]);
+                    sub_P_T.Add(plainText[j]);
+                    sub_P_T.Add(plainText[j + 1]);
+
+                    //sub_C_T.Add(cipherText[j]);
+                    //sub_C_T.Add(cipherText[j + 1]);
+
+                    //P_T_arr[1] = plainText[j];
+                    //P_T_arr[3] = plainText[j + 1];
+
+                    C_T_arr[1] = cipherText[j];
+                    C_T_arr[3] = cipherText[j + 1];
+
+                    for (int c = 0; c < m*m; c++) // because that Matrix Multiply take row wise // sub cipher text needs to be re arranged
+                    {
+                       // sub_P_T.Add(P_T_arr[c]);
+                        sub_C_T.Add(C_T_arr[c]);
+                    }
+                    try
+                    {
+                        Key = Decrypt(sub_C_T, sub_P_T);
+                    }
+                    catch(Exception e)
+                    {
+                        Key = null;
+                        Console.WriteLine(e.Message);
+                    }
+                    if (Key != null)
+                    {
+                        List<int> C_T = Encrypt(plainText, Key); // to check the correct of the key
+                        bool Key_Solved = true;
+                        for (int c = 0; c < cipherText.Count; c++)
+                        {
+                            if (cipherText[c] != C_T[c]) { Key_Solved = false; break; }
+                        }
+                        if (Key_Solved) return Key;
+                    }
+
+                    sub_P_T.RemoveAt(3); // remove the last chossen char 
+                    sub_P_T.RemoveAt(2);
+
+                    //sub_C_T.RemoveAt(3);
+                    //sub_C_T.RemoveAt(2);
+                    
+                    //sub_P_T.Clear();
+                    sub_C_T.Clear();
+
                 }
-
-                //Key = Decrypt(sub_C_T, sub_P_T);
-                Key = Decrypt(sub_P_T, sub_C_T);
-
-                if (Key != null) break;
 
                 sub_P_T.Clear();
                 sub_C_T.Clear();
@@ -69,9 +124,7 @@ namespace SecurityLibrary
              }*/
             #endregion
 
-            if (Key == null) throw new InvalidAnlysisException();
-
-            return Key;
+            throw new InvalidAnlysisException();
             //throw new NotImplementedException();
         }
 
@@ -82,7 +135,7 @@ namespace SecurityLibrary
 
             List<int> inverse = K_inverse(key, m ,26 , true);
 
-            if (inverse == null) return null;
+            if (inverse == null) throw new InvalidOperationException();
 
             List<int> PlainText = new List<int>();
             int count_char = 0;
@@ -171,8 +224,87 @@ namespace SecurityLibrary
 
         public List<int> Analyse3By3Key(List<int> plainText, List<int> cipherText)
         {
+            if (plainText.Count != cipherText.Count) throw new InvalidAnlysisException();
 
-            throw new NotImplementedException();
+            int m = 3;
+            int _base = 26;
+
+            List<int> Key = new List<int>();
+            List<int> sub_P_T = new List<int>();
+            List<int> sub_C_T = new List<int>();
+
+            //int[] P_T_arr = new int[m * m];
+            int[] C_T_arr = new int[m * m]; //  {0 , 1 , 2 } 
+                                            //  {3 , 4 , 5 }
+                                            //  {6 , 7 , 7 }
+
+            for (int i = 0; i < plainText.Count; i+=m) // first col
+            {
+                sub_P_T.Add(plainText[i]);
+                sub_P_T.Add(plainText[i + 1]);
+                sub_P_T.Add(plainText[i + 2]);
+
+                C_T_arr[0] = cipherText[i];
+                C_T_arr[3] = cipherText[i + 1];
+                C_T_arr[6] = cipherText[i + 2];
+                for (int j = i + m; j < plainText.Count; j+=m) // second col
+                {
+                    sub_P_T.Add(plainText[j]);
+                    sub_P_T.Add(plainText[j + 1]);
+                    sub_P_T.Add(plainText[j + 2]);
+
+                    C_T_arr[1] = cipherText[j];
+                    C_T_arr[4] = cipherText[j + 1];
+                    C_T_arr[7] = cipherText[j + 2];
+                    for (int k = j + m; k < plainText.Count; k+=m) // third col
+                    {
+                        sub_P_T.Add(plainText[k]);
+                        sub_P_T.Add(plainText[k + 1]);
+                        sub_P_T.Add(plainText[k + 2]);
+
+                        C_T_arr[2] = cipherText[k];
+                        C_T_arr[5] = cipherText[k + 1];
+                        C_T_arr[8] = cipherText[k + 2];
+
+                        for (int c = 0; c < m*m; c++)
+                        {
+                            sub_C_T.Add(C_T_arr[c]);
+                        }
+
+                        try
+                        {
+                            Key = Decrypt(sub_C_T, sub_P_T);
+                        }
+                        catch (Exception e)
+                        {
+                            Key = null;
+                        }
+
+                        if (Key != null)
+                        {
+                            List<int> C_T = Encrypt(plainText, Key); // to check the correct of the key
+                            bool Key_Solved = true;
+                            for (int c = 0; c < cipherText.Count; c++)
+                            {
+                                if (cipherText[c] != C_T[c]) { Key_Solved = false; break; }
+                            }
+                            if (Key_Solved) return Key;
+                        }
+
+                        sub_P_T.RemoveAt(8); // remove the last col
+                        sub_P_T.RemoveAt(7);
+                        sub_P_T.RemoveAt(6);
+
+                        sub_C_T.Clear(); // clear sub cipher imediatly it will be re failed again in for loop
+                    }
+                    sub_P_T.RemoveAt(5); // remove the middle col
+                    sub_P_T.RemoveAt(4);
+                    sub_P_T.RemoveAt(3);
+                }
+                sub_P_T.Clear(); // remove all // and replace
+            }
+            throw new InvalidAnlysisException();
+            //throw new NotImplementedException();
         }
 
         private List<int> matrix_mul(List<int> sub_text , List<int> key , int m , int mod)
